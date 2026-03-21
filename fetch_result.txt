@@ -1,0 +1,2 @@
+Status: 500
+Body: {"error":"Failed to summarize text. Details: 404 status code (no body)"}

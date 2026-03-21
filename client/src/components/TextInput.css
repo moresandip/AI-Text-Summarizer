@@ -1,0 +1,42 @@
+.input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.textarea {
+  padding: 1rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #1a1a1a;
+  color: white;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.submit-btn {
+  padding: 1rem 2rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.submit-btn:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
