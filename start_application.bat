@@ -1,12 +1,10 @@
 @echo off
-echo Starting Backend Server...
-start cmd /k "cd server && node src/index.js"
-
-echo Starting Frontend Server...
-start cmd /k "cd client && npm run dev"
-
-echo ==============================================
-echo Both servers are starting in separate windows!
-echo Once they are ready, you can view the app at:
-echo http://localhost:3000
-echo ==============================================
+echo Starting Backend...
+start "Backend" cmd /k "cd server && npm run dev"
+timeout /t 3 /nobreak >nul
+echo Starting Frontend...
+start "Frontend" cmd /k "cd client && npm run dev"
+timeout /t 3 /nobreak >nul
+echo Opening UI...
+start http://localhost:3000
+echo Done! Check terminals.
