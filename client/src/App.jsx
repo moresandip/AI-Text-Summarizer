@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import TextInput from './components/TextInput';
 import ResultDisplay from './components/ResultDisplay';
 import './components/TextInput.css';
@@ -15,29 +16,11 @@ function App() {
     setError('');
     setResult(null);
     try {
-      const response = await fetch('/api/summarize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          throw new Error(data.error || 'API error');
-        } else {
-          throw new Error(`API error (${response.status}): Backend server might be unreachable.`);
-        }
-      }
-      
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Received non-JSON response from server. Check if the backend is running.");
-      }
-      const data = await response.json();
-      setResult(data);
+      const response = await axios.post('/api/summarize', { text });
+      setResult(response.data);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.response?.data?.error || 'Backend unreachable (404?): Start server with `cd server && npm run dev`');
     } finally {
       setLoading(false);
     }
