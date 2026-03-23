@@ -1,5 +1,5 @@
 const text = "Apple is an incredible technology company. They created the iPhone and Mac computers which revolutionised the world. I love using modern technology.";
-fetch('http://localhost:3001/api/summarize', {
+fetch('http://localhost:5000/api/summarize', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({text})
