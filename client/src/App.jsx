@@ -20,7 +20,14 @@ function App() {
       setResult(response.data);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || 'Backend unreachable (404?): Start server with `cd server && npm run dev`');
+      const errorMsg =
+        err.response?.data?.error ||
+        (err.code === 'ERR_NETWORK'
+          ? 'Backend unreachable. Make sure the Express server is running on http://localhost:5000.'
+          : err.response?.status === 500
+            ? 'Backend error (500). Check server logs and GEMINI_API_KEY in server/.env.'
+            : `Request failed (${err.response?.status || 'unknown'}).`);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

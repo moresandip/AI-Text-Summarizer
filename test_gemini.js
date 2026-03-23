@@ -1,5 +1,12 @@
 const fs = require('fs');
-const key = 'AIzaSyDfqdJNhjZIkxNLvsCKADPcq7qlJhJEEg4';
+const key = process.env.GEMINI_API_KEY;
+const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+
+if (!key) {
+  fs.writeFileSync('c:\\Users\\mores\\OneDrive\\Desktop\\Ai_Final_Project\\gemini_test.txt', 'Error: GEMINI_API_KEY is missing');
+  process.exit(1);
+}
+
 fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
   method: 'POST',
   headers: {
@@ -7,7 +14,7 @@ fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions'
     'Authorization': 'Bearer ' + key
   },
   body: JSON.stringify({
-    model: 'gemini-1.5-flash',
+    model,
     messages: [{role: 'user', content: 'hello'}]
   })
 }).then(async r => {

@@ -1,6 +1,6 @@
 # AI Text Summarizer
 
-A full-stack web application that accepts unstructured text and produces a highly structured summary using the Google Gemini 1.5 Flash LLM API. 
+A full-stack web application that accepts unstructured text and produces a highly structured summary using the Google Gemini API.
 
 This project was built for the AI Developer Intern shortlisting task.
 
@@ -19,11 +19,21 @@ The project uses a separated Client/Server architecture:
    ```bash
    npm install
    ```
-3. Copy the `.env.example` file to create your own `.env`:
-   ```bash
-   cp .env.example .env
+3. Copy **server/.env.example** to **server/.env**:
    ```
-4. Open `.env` and add your Gemini API Key as `OPENAI_API_KEY` (or `GEMINI_API_KEY`).
+   cd server
+   copy .env.example .env
+   notepad .env
+   ```
+   Paste your **GEMINI_API_KEY=your_key_here** (get from https://aistudio.google.com/app/apikey).
+   Optionally set **GEMINI_MODEL=gemini-2.0-flash** to override the default model.
+4. Start the backend server:
+4. Open `server/.env` and add your **GEMINI_API_KEY**:
+```
+GEMINI_API_KEY=AIzaSyC...your_key_here
+GEMINI_MODEL=gemini-2.0-flash
+```
+**Get free API key:** https://aistudio.google.com/app/apikey (no credit card needed for starter quota)
 5. Start the backend server:
    ```bash
    npm run dev
@@ -42,15 +52,15 @@ The project uses a separated Client/Server architecture:
    ```bash
    npm run dev
    ```
-4. Open your browser and navigate to **http://localhost:3000** to use the application.
+4. Open your browser and navigate to **http://localhost:5173** (Vite dev server) to use the application.
 
-*Note: For convenience on Windows, you can simply run the provided `start_application.bat` script in the root directory to instantly spawn both backend and frontend servers.*
+*Note: For convenience on Windows, run `start_application.bat` (cmd) or `.\start_application.bat` (PowerShell) in the root directory to spawn both servers + open browser.*
 
 ---
 
 ## 🤖 AI Model & Architecture
-**Model Chosen:** Google Gemini 1.5 Flash (`gemini-1.5-flash`) via the native Google REST API.  
-**Why?** Gemini 1.5 Flash is incredibly fast, highly cost-effective, and exceptionally reliable at formatting structured output. By using the native REST API rather than an SDK wrapper (like OpenAI compatibility mode), I bypassed third-party adapter bugs (such as `v1main` endpoint crashes) providing a 100% reliable production connection.
+**Model Chosen:** Google Gemini Flash via the native Google REST API, defaulting to `gemini-2.0-flash` and configurable through `GEMINI_MODEL`.  
+**Why?** A configurable model keeps the app resilient when older aliases are retired while preserving the same lightweight REST integration.
 
 ### Prompt Design & Reasoning
 The core of the logic lives in `server/src/services/llm.js`. 

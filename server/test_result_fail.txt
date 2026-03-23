@@ -1,0 +1,6 @@
+Testing Gemini API with model: gemini-1.5-flash-latest
+Test Failed: Summarization failed: 404 status code (no body). Verify GEMINI_API_KEY in server/.env
+Stack: Error: Summarization failed: 404 status code (no body). Verify GEMINI_API_KEY in server/.env
+    at summarizeText (file:///C:/Users/mores/OneDrive/Desktop/Ai_Final_Project/server/src/services/llm.js:82:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async test (file:///C:/Users/mores/OneDrive/Desktop/Ai_Final_Project/server/test_llm_file.js:11:20)

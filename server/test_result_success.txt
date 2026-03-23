@@ -1,0 +1,4 @@
+Testing Gemini API with model: gemini-flash-latest
+Calling summarizeText...
+Success!
+Summary: The text presents a classic test sentence featuring a quick brown fox jumping over a lazy dog.

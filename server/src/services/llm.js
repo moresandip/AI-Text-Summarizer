@@ -6,6 +6,17 @@ const summarySchema = z.object({
   sentiment: z.enum(['positive', 'neutral', 'negative']),
 });
 
+// Removed invalid legacy mapping - use valid models directly
+const LEGACY_MODEL_MAP = {};
+
+function resolveGeminiModel(rawModel) {
+  const requestedModel = rawModel || 'gemini-1.5-flash';
+  return {
+    requestedModel,
+    model: LEGACY_MODEL_MAP[requestedModel] || requestedModel,
+  };
+}
+
 export async function summarizeText(text) {
   const prompt = `You are an expert summarization assistant.
 Analyze the following text and return ONLY a strict JSON object with the exact structure below. Do not include markdown formatting or backticks.
@@ -23,38 +34,61 @@ Analyze the following text and return ONLY a strict JSON object with the exact s
 Text to summarize:
 ${text}`;
 
+  const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+  const { requestedModel, model } = resolveGeminiModel(process.env.GEMINI_MODEL);
+
+  if (!apiKey) {
+    console.error(
+      'API KEY ERROR: No LLM API key found. Get GEMINI_API_KEY from https://aistudio.google.com/app/apikey'
+    );
+    throw new Error('API key missing. Set GEMINI_API_KEY in server/.env');
+  }
+
+  if (requestedModel !== model) {
+    console.warn(`Legacy Gemini model "${requestedModel}" remapped to "${model}". Update GEMINI_MODEL in server/.env.`);
+  }
+
+  console.log(`LLM API ready (Gemini: ${model})`);
+
   try {
-const apiKey = process.env.GEMINI_API_KEY || "AIzaSyC1LerLFQTxMDa4AaGwB_TNQfVaxM_BP8A";
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1 }
-      })
-    });
-    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.1 },
+        }),
+      }
+    );
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API Error:", errorText);
-      throw new Error("Gemini API Error");
+      console.error(`Gemini API Error (${response.status}):`, errorText);
+      const isQuotaError = response.status === 429;
+      const message = isQuotaError 
+        ? `Gemini API quota exceeded (429). Try switching to "gemini-flash-latest" in .env, or check your billing at aistudio.google.com.`
+        : `Gemini API failed (${response.status}) using model "${model}": ${errorText.slice(0, 200)}.`;
+      throw new Error(message);
     }
 
     const data = await response.json();
-    const content = data.candidates[0].content.parts[0].text;
-    
-    let jsonStr = content.replace(/```(?:json)?\n?/g, '').replace(/```\n?$/g, '').trim();
-    let parsed = JSON.parse(jsonStr);
-    
-    console.log("Raw LLM output successfully parsed:", parsed);
-    return summarySchema.parse(parsed);
+    const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!content) {
+      throw new Error('Gemini API returned no summary content');
+    }
 
+    const jsonStr = content
+      .replace(/```(?:json)?\n?/g, '')
+      .replace(/```\n?$/g, '')
+      .trim();
+    const parsed = JSON.parse(jsonStr);
+
+    console.log('LLM response parsed OK');
+    return summarySchema.parse(parsed);
   } catch (apiError) {
-    console.warn("Gemini API call failed. Falling back to mock summary. Error:", apiError);
-    return {
-      summary: "This is a fallback mock summary because the real Gemini API request failed (check API key permissions).",
-      keyPoints: ["The application is running!", "The UI works perfectly", "Check your Google Cloud console to fix the API key"],
-      sentiment: "neutral"
-    };
+    console.error('LLM call failed:', apiError.message);
+    throw new Error(`Summarization failed: ${apiError.message}. Verify GEMINI_API_KEY in server/.env`);
   }
 }
