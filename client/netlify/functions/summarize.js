@@ -1,14 +1,11 @@
 exports.handler = async (event) => {
   try {
     const { text } = JSON.parse(event.body);
-    const requestedModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-    const model =
-      requestedModel === "gemini-1.5-flash" || requestedModel === "gemini-1.5-flash-latest"
-        ? "gemini-1.5-flash"
-        : requestedModel;
+    const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
+    const apiKey = process.env.GEMINI_API_KEY;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: {
