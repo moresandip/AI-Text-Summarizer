@@ -1,16 +1,17 @@
-export default async (req, context) => {
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405 });
+export async function handler(event, context) {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    const { text } = await req.json();
+    const { text } = JSON.parse(event.body);
     
     if (!text || text.length > 5000) {
-      return new Response(JSON.stringify({ error: "Invalid text input" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
-      });
+      return {
+        statusCode: 400,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Invalid text input" })
+      };
     }
 
     const prompt = `You are an expert summarization assistant.
@@ -29,14 +30,15 @@ Analyze the following text and return ONLY a strict JSON object with the exact s
 Text to summarize:
 ${text}`;
 
-    // Read the API key from Netlify Environment Variables
-    const apiKey = Netlify.env.get("OPENAI_API_KEY") || process.env.OPENAI_API_KEY;
+    // Read the API key from Environment Variables
+    const apiKey = process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
     
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "Server API Key is not configured." }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" }
-      });
+      return {
+        statusCode: 500,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Server API Key is not configured." })
+      };
     }
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
@@ -50,10 +52,11 @@ ${text}`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      return new Response(JSON.stringify({ error: `Gemini API Error: ${errorText}` }), {
-        status: response.status,
-        headers: { "Content-Type": "application/json" }
-      });
+      return {
+        statusCode: response.status,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: `Gemini API Error: ${errorText}` })
+      };
     }
 
     const data = await response.json();
@@ -62,16 +65,18 @@ ${text}`;
     // Clean up markdown wrapping from AI output
     let jsonStr = content.replace(/```(?:json)?\n?/g, '').replace(/```\n?$/g, '').trim();
     
-    return new Response(jsonStr, {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-    });
+    return {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json" },
+        body: jsonStr
+    };
 
   } catch (error) {
     console.error("Function error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" }
-    });
+    return {
+        statusCode: 500,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: error.message })
+    };
   }
-};
+}
