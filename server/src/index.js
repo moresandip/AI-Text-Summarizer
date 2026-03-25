@@ -6,19 +6,8 @@ import { validateInput } from './middleware/validate.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error(`Origin ${origin} not allowed by CORS`));
-    },
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
