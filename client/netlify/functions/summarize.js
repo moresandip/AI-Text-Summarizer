@@ -1,7 +1,7 @@
 exports.handler = async (event) => {
   try {
     const { text } = JSON.parse(event.body);
-    const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+    const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
