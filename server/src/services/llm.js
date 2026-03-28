@@ -10,7 +10,7 @@ const summarySchema = z.object({
 const LEGACY_MODEL_MAP = {};
 
 function resolveGeminiModel(rawModel) {
-  const requestedModel = rawModel || 'gemini-2.0-flash';
+  const requestedModel = rawModel || 'gemini-flash-latest';
   return {
     requestedModel,
     model: LEGACY_MODEL_MAP[requestedModel] || requestedModel,
